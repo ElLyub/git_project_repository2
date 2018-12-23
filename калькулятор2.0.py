@@ -32,6 +32,7 @@ class Calculator(QWidget):
 
         self.count = 0 #текущее число
         self.exponent = -1
+        
         self.a = 0 #первое введенное число
         self.memory = 0
         self.oper = ''
@@ -100,8 +101,6 @@ class Calculator(QWidget):
         else:
             self.count += int(self.sender().text()) * 10**self.exponent
             self.exponent -= 1
-        if self.flag:
-            self.count = self.count-self.count*2
         self.z.display(self.count)
     
     def PointClicked(self):
@@ -190,20 +189,22 @@ class Binary_Calculator(QWidget):
         self.setWindowTitle("Калькулятор")
         self.resize(400, 400)
         self.z = QLCDNumber(self) #поле
-        self.z.setDigitCount(10) 
+        self.z.setDigitCount(10) #кол-во десятичных разрядов, размер поля
+
         self.label = QLabel(self)
         self.label.setText("MR = 0 ")
         self.label.setFont(QtGui.QFont("Yu Gothic UI Semibold", 11, QtGui.QFont.Bold))
         self.label.move(20, 15)
         self.label.setStyleSheet('QLabel {background-color: rgb(249, 249, 249); color: transparent;}')
         
-        self.z.setStyleSheet("background-color: rgb(249, 249, 249);")
+        self.z.setStyleSheet("background-color: rgb(249, 249, 249);")#SS - таблица стилей; свойство: значение св-ва
         p = self.palette()
         p.setColor(self.backgroundRole(), QtCore.Qt.darkGray)
         self.setPalette(p)  
 
         self.count = 0 #текущее число
         self.exponent = -1
+        self.flag = False
         self.a = 0 #первое введенное число
         self.memory = 0
         self.oper = ''
@@ -213,7 +214,7 @@ class Binary_Calculator(QWidget):
         self.grid = QGridLayout() #сетка
         self.grid.addWidget(self.z, 0, 0, 1, 4) #окно вывода
         operation = ['C', "←","MC", "M+", "M-", "MR",
-                     "+", "-", "*", "/", "="] 
+                     "+", "-", "*", "/", "="] #значки, стилевое форматирование(вверх поднять)
         row = 1
         for i in range(2):
             self.operButtons.append(self.createButton(operation[i],
@@ -368,5 +369,3 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = UserChoice()    
     sys.exit(app.exec())
-
-    
