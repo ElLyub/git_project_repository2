@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QRadioButton, QB
 from PyQt5.QtWidgets import QLabel, QLCDNumber, QLineEdit, QToolButton, QGridLayout, QVBoxLayout
 
     
- 
 class Calculator(QWidget):
     
     def __init__(self):
