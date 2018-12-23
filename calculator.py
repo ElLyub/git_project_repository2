@@ -178,3 +178,154 @@ class Calculator(QWidget):
             button.setStyleSheet('QPushButton {background-color: black; color: white;}')
         button.clicked.connect(member)
         return button
+
+
+class Binary_Calculator(QWidget):
+    
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Калькулятор")
+        self.resize(400, 400)
+        self.z = QLCDNumber(self) #поле
+        self.z.setDigitCount(10) 
+        self.label = QLabel(self)
+        self.label.setText("MR = 0 ")
+        self.label.setFont(QtGui.QFont("Yu Gothic UI Semibold", 11, QtGui.QFont.Bold))
+        self.label.move(20, 15)
+        self.label.setStyleSheet('QLabel {background-color: rgb(249, 249, 249); color: transparent;}')
+        
+        self.z.setStyleSheet("background-color: rgb(249, 249, 249);")
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtCore.Qt.darkGray)
+        self.setPalette(p)  
+
+        self.count = 0 #текущее число
+        self.exponent = -1
+        self.a = 0 #первое введенное число
+        self.memory = 0
+        self.oper = ''
+        
+        self.digitButtons = []
+        self.operButtons = []
+        self.grid = QGridLayout() #сетка
+        self.grid.addWidget(self.z, 0, 0, 1, 4) #окно вывода
+        operation = ['C', "←","MC", "M+", "M-", "MR",
+                     "+", "-", "*", "/", "="] 
+        row = 1
+        for i in range(2):
+            self.operButtons.append(self.createButton(operation[i],
+                    self.operClicked))
+        self.grid.addWidget(self.operButtons[0],row, 0, 1, 2)
+        self.grid.addWidget(self.operButtons[1],row, 2, 1, 2)
+        row = 3
+        col = 0
+        for i in range(2, 6):
+            self.operButtons.append(self.createButton(operation[i],
+                    self.operClicked))
+            self.grid.addWidget(self.operButtons[i],row, col)
+            col += 1
+        row = 4
+        col = 0
+        
+        n = 0
+        for i in '10':
+            self.digitButtons.append(self.createButton(i,
+                    self.digitClicked))
+            self.grid.addWidget(self.digitButtons[n],row, col, 1, 2)
+            n += 1
+            col += 2
+        
+        row += 1
+        for i in range(6, 10):
+            self.operButtons.append(self.createButton(operation[i],
+                    self.operClicked))
+            self.grid.addWidget(self.operButtons[i], row, i-6)
+    
+        self.operButtons.append(self.createButton(operation[10],
+                self.operClicked))
+        self.grid.addWidget(self.operButtons[10], row+1, 0, 1, 4)
+ 
+        self.setLayout(self.grid)
+        self.show() 
+ 
+    def digitClicked(self):
+        if type(self.count) == int:
+            self.count =  int(self.count) * 10 + int(self.sender().text())
+        else:
+            self.count += int(self.sender().text()) * 10**self.exponent
+            self.exponent -= 1
+        if self.flag:
+            self.count = self.count-self.count*2
+        self.z.display(self.count)
+    
+    def PointClicked(self):
+        self.count = float(self.count)
+        self.z.display(self.count)
+ 
+    def operClicked(self):
+        if self.sender().text() not in ['C', "M+", "M-", "MR", "MC", "←", '=']: 
+            self.oper = self.sender().text()
+            self.a = int(self.count)
+            self.count = 0
+        elif self.sender().text() == '=':
+            if self.oper == '+':
+                self.count = self.ToBin(self.fromBinTo(self.a) + self.fromBinTo(int(self.count)))
+            elif self.oper == '-':
+                self.count = self.ToBin(self.fromBinTo(self.a) - self.fromBinTo(int(self.count)))
+            elif self.oper == '*':
+                self.count = self.ToBin(self.fromBinTo(self.a) * self.fromBinTo(int(self.count)))
+            elif self.oper == '/' and int(self.count) != 0:
+                self.count = self.ToBin(self.fromBinTo(self.a) / self.fromBinTo(int(self.count)))
+            elif self.oper == '/' and int(self.count) == 0:
+                self.count = 'Error'
+        elif self.sender().text() == 'C':
+            self.count = 0
+        elif self.sender().text() == '←':
+            self.count = self.count // 10
+        elif self.sender().text() == 'MC':
+            self.memory = 0
+            self.label.setText("MR = {}".format(self.memory)) 
+        elif self.sender().text() == 'M+':
+            self.memory = self.ToBin(self.fromBinTo(self.memory) + self.fromBinTo(int(self.count)))
+            self.label.setText("MR = {}".format(self.memory))
+            self.label.adjustSize()
+            self.label.setStyleSheet("QLabel { color: red}")   
+        elif self.sender().text() == 'M-':
+            self.memory = self.ToBin(self.fromBinTo(self.memory) - self.fromBinTo(int(self.count)))
+            self.label.setText("MR = {}".format(self.memory))
+            self.label.adjustSize()
+            self.label.setStyleSheet("QLabel { color: red}")
+        elif self.sender().text() == 'MR':
+            self.count = self.memory
+            self.label.setText("MR = {}".format(self.memory))
+            self.label.adjustSize()
+            self.label.setStyleSheet("QLabel { color: red}")
+            
+        self.z.display(self.count)
+ 
+    def createButton(self, text, member): 
+        button = QPushButton(text)
+        if text in '10':
+            button.setStyleSheet('QPushButton {background-color: rgb(27, 27, 27); color: white;}')
+        else:
+            button.setStyleSheet('QPushButton {background-color: black; color: white;}')
+        button.clicked.connect(member)
+        return button
+
+    def ToBin(self, number):
+        x = number
+        n = "" if x>0 else "0"
+        while x > 0:
+            y = str(x % 2)
+            n = y + n
+            x = int(x / 2)
+        return int(n)
+    
+    def fromBinTo(self, number):
+        n = int(str(number), base=2)
+        return n
+
+    
